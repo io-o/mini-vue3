@@ -1,6 +1,6 @@
 class ReactiveEffect {
   private _fn: () => void;
-  constructor(fn) {
+  constructor(fn, public scheduler?) {
     this._fn = fn;
   }
 
@@ -11,8 +11,9 @@ class ReactiveEffect {
 }
 
 let activeEffect;
-export const effect = (fn) => {
-  const effct = new ReactiveEffect(fn);
+export const effect = (fn, options?) => {
+  const scheduler = options?.scheduler;
+  const effct = new ReactiveEffect(fn, scheduler);
 
   effct.run();
 
@@ -52,6 +53,10 @@ export const trigger = (target, key) => {
 
   // 拿到依赖执行
   for (const effect of dep) {
-    effect.run();
+    if (effect.scheduler) {
+      effect.scheduler();
+    } else {
+      effect.run();
+    }
   }
 };
